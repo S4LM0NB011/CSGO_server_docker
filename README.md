@@ -1,1 +1,1 @@
-# CSGO_server_docker
+# LGSM Running CSGO In Docker
