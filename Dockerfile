@@ -2,6 +2,8 @@ FROM ubuntu:18.04
 LABEL maintainer="mattias.coelho@gmail.com"
 LABEL description="This is my attempt to create a dockerfile to run a csgo server with LGSM, sourcemod, metamod and pugsetup"
 
+ENV DEBIAN_FRONTEND noninteractive
+
 RUN dpkg --add-architecture i386
 RUN apt update && \
 	apt install -y --no-install-recommends --no-install-suggests \
@@ -25,11 +27,23 @@ RUN apt update && \
 		lib32gcc1 \
 		libstdc++6 \
 		lib32stdc++6
-RUN apt install steamcmd -y
+WORKDIR home/csgoserver
+RUN wget -O linuxgsm.sh https://linuxgsm.sh && \
+    chmod +x linuxgsm.sh && \
+    chmod -R a+rwx /home/csgoserver/
+RUN useradd -g root -G sudo csgoserver
 USER csgoserver
-RUN wget -O linuxgsm.sh https://linuxgsm.sh \
-	&& chmod +x linuxgsm.sh \
-	&& bash linuxgsm.sh csgoserver \
-	&& ./csgoserver install
 
-EXPOSE 27015
+
+#RUN apt install steamcmd -y
+
+RUN  bash linuxgsm.sh csgoserver
+RUN ./csgoserver ai
+WORKDIR home/csgoserver/serverfiles/csgo
+RUN wget https://mms.alliedmods.net/mmsdrop/1.10/mmsource-1.10.7-git971-linux.tar.gz \
+        https://sm.alliedmods.net/smdrop/1.10/sourcemod-1.10.0-git6490-linux.tar.gz
+
+
+
+
+EXPOSE 27015/tcp 27015/udp 27020/udp
